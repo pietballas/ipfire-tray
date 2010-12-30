@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
-import java.lang.String;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -44,7 +43,7 @@ import sun.misc.BASE64Encoder;
  */
 public class IPFireDataProvider {
 
-    static String IPFIRE_SPEED_CGI_PATH = "/cgi-bin/speed.cgi"; // absolute path to "speed.cgi"
+    static String IPFIRE_SPEED_CGI_PATH = "/cgi-bin/speed.cgi"; // path to "speed.cgi"
 
     final protected String host;
     final protected int    port;

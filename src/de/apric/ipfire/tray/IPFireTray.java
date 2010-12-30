@@ -16,7 +16,6 @@
  */
 package de.apric.ipfire.tray;
 
-import java.awt.AWTException;
 import java.awt.Image;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
@@ -45,10 +44,10 @@ public class IPFireTray extends MouseAdapter {
     /**
      * creates a tray icon (the main application) and adds it to the tray
      * 
-     * @param properties
+     * @param validProperties
      * @throws Exception all critical errors will go up
      */
-    public IPFireTray(final Properties properties) throws Exception {
+    public IPFireTray(final Properties validProperties) throws Exception {
 
         /* ensure system tray is supported: */
         final SystemTray sysTray = SystemTray.getSystemTray();
@@ -57,15 +56,15 @@ public class IPFireTray extends MouseAdapter {
         }
 
         dataProvider = new IPFireDataProvider(
-                properties.getProperty("host"),
-                Integer.parseInt(properties.getProperty("port")),
-                properties.getProperty("user"),
-                properties.getProperty("pass"));
+                validProperties.getProperty("host"),
+                Integer.parseInt(validProperties.getProperty("port")),
+                validProperties.getProperty("user"),
+                validProperties.getProperty("pass"));
 
         /* read properties: */
-        refreshInterval = Long.parseLong(properties.getProperty("interval"));
-        maxDownKBpS = Float.parseFloat(properties.getProperty("maxDownKBpS"));
-        maxUpKBpS = Float.parseFloat(properties.getProperty("maxUpKBpS"));
+        refreshInterval = Long.parseLong(validProperties.getProperty("interval"));
+        maxDownKBpS = Float.parseFloat(validProperties.getProperty("maxDownKBpS"));
+        maxUpKBpS = Float.parseFloat(validProperties.getProperty("maxUpKBpS"));
 
 
         /* tray icon: */
@@ -80,11 +79,11 @@ public class IPFireTray extends MouseAdapter {
 
         
         /* popup menu: */
-        popupMenu = new TrayPopupMenu(properties);
+        popupMenu = new TrayPopupMenu(validProperties);
 
         
         /* add tray icon to system tray: */
-        SystemTray.getSystemTray().add(trayIcon);
+        sysTray.add(trayIcon);
 
 
         /* start update thread: */
