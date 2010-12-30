@@ -48,7 +48,7 @@ class SettingsManager {
      * @return the properties from disk, or the default properties, if none existed
      * @throws IOException
      */
-    public static Properties loadProperties() throws IOException {
+    public static Properties loadProperties() throws Exception {
 
         File propFile = null;
 
@@ -138,15 +138,15 @@ class SettingsManager {
      * @return the properties file we just saved (validated)
      * @throws IOException
      */
-    public static Properties saveAndGetSettings(Properties properties) throws IOException{
+    public static Properties saveAndGetSettings(Properties properties) throws Exception{
 
+        validate(properties);
+        
         FileOutputStream fos = null;
 
         try {
             fos = new FileOutputStream(new File(PROP_FILE_NAME));
             properties.store(fos, "config for IPFireTray");
-
-            validate(properties);
 
             return properties;
         }

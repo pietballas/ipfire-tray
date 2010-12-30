@@ -36,14 +36,14 @@ public class Main {
     public static void main(String[] args) {
         
         try {
-            final Properties properties = SettingsManager.loadProperties(); // load the properties file first
+            final Properties validProperties = SettingsManager.loadProperties(); // load the properties file first
 
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
                     try {
-                        new IPFireTray(properties); // launch the tray icon
+                        new IPFireTray(validProperties); // launch the tray icon
                     } catch (Exception e) {
                         new ErrorDialog(e, true).setVisible(true);
                     }
