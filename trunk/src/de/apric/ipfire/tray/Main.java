@@ -50,16 +50,14 @@ public class Main {
                 }
                 
             });
-            
-//            new MySystemTray(properties); // launch the tray icon
         }
 
         /* handle all kinds of critical errors: */
 
-        catch (NumberFormatException e){
+        catch (NumberFormatException e){ // should only occur if some configuration values are invalid:
             new ErrorDialog(new IllegalArgumentException("Check your configuration file for errors.", e), true).setVisible(true);
         }
-        catch (Exception e){
+        catch (Exception e){ // all other exceptions:
             new ErrorDialog(e, true).setVisible(true);
         }
     }
