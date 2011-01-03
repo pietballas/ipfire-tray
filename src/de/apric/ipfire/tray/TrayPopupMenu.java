@@ -25,7 +25,6 @@ package de.apric.ipfire.tray;
 import de.apric.ipfire.tray.gui.ErrorDialog;
 import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.MenuItem;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,8 +34,8 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 import javax.swing.JDialog;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
+//import javax.swing.SwingUtilities;
 import javax.swing.SwingUtilities;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -47,13 +46,13 @@ import javax.swing.event.PopupMenuListener;
  */
 public class TrayPopupMenu extends JPopupMenu {
     
-    private JDialog parent;
+    private final JDialog parent;
 
     
     /**
      * create the swing JPopupMenu
      */
-    public TrayPopupMenu(Properties properties) throws URISyntaxException {
+    public TrayPopupMenu(final Properties properties) throws URISyntaxException {
         super();
         
         parent = new JDialog();
@@ -70,25 +69,17 @@ public class TrayPopupMenu extends JPopupMenu {
         setVisible(false);
     }
     
-    private void initComponents(Properties properties) throws URISyntaxException{
-        
-//        JMenuItem menuItem1 = new JMenuItem("Test 1");
-//        menuItem1.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                JOptionPane.showMessageDialog(null, "Test 1 angeklickt");
-//            }
-//        });
+    private void initComponents(final Properties properties) throws URISyntaxException {
         
         /* "open admin web interface" item (only if supported): */
-        if(Desktop.isDesktopSupported()) {
+        if (Desktop.isDesktopSupported()) {
             final Desktop desktop = java.awt.Desktop.getDesktop();
-            if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)){
-                JMenuItem itemWebInterface = new JMenuItem("Open Admin Web Interface");
+            if (desktop.isSupported(java.awt.Desktop.Action.BROWSE)) {
+                final JMenuItem itemWebInterface = new JMenuItem("Open Admin Web Interface");
                 final URI uri = new java.net.URI("https://" + properties.getProperty("host") + ":" + properties.getProperty("port"));
                 itemWebInterface.addActionListener(new ActionListener() {
                     @Override
-                    public void actionPerformed(ActionEvent e) {
+                    public void actionPerformed(final ActionEvent e) {
                         try {
                             desktop.browse(uri);
                         } catch (IOException ex) {
@@ -102,10 +93,10 @@ public class TrayPopupMenu extends JPopupMenu {
         }
         
         /* "exit" item: */
-        JMenuItem itemExit = new JMenuItem("Exit");
+        final JMenuItem itemExit = new JMenuItem("Exit");
         itemExit.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent e) {
                 System.exit(0);
             }
         });
@@ -118,15 +109,15 @@ public class TrayPopupMenu extends JPopupMenu {
         this.addPopupMenuListener(new PopupMenuListener() {
 
             @Override
-            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+            public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {}
 
             @Override
-            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+            public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
                 parent.setVisible(false);
             }
 
             @Override
-            public void popupMenuCanceled(PopupMenuEvent e) {}
+            public void popupMenuCanceled(final PopupMenuEvent e) {}
         });
     }
     
@@ -142,7 +133,7 @@ public class TrayPopupMenu extends JPopupMenu {
 
             @Override
             public void run() {
-                Point p2 = computePopupCoords(eventPoint.x, eventPoint.y, getPreferredSize());
+                final Point p2 = computePopupCoords(eventPoint.x, eventPoint.y, getPreferredSize());
                 show(parent, p2.x - parent.getLocation().x, p2.y - parent.getLocation().y);
             }
         });
@@ -156,7 +147,7 @@ public class TrayPopupMenu extends JPopupMenu {
      * @param componentDimension
      * @return 
      */
-    private Point computePopupCoords(int eventX, int eventY, Dimension componentDimension) {
+    private Point computePopupCoords(final int eventX, final int eventY, final Dimension componentDimension) {
         
         int x = eventX;
         int y = eventY;

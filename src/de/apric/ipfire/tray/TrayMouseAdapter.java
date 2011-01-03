@@ -34,20 +34,23 @@ import java.awt.event.MouseEvent;
  *
  * @author apric
  */
-public class TrayMouseAdapter extends MouseAdapter {
+public final class TrayMouseAdapter extends MouseAdapter {
 
-        private IPFireTray delegate;
+        private final IPFireTray delegate;
         private boolean mouseover;
         private Thread mouseLocationObserver;
         // private TrayIcon trayIcon;
         private Point min;
         private Point max;
-        private Dimension size;
+        private final Dimension size;
         private MouseEvent lastEvent;
-        private Component dummy;
-        private final static int TOOLTIP_DELAY = 300;
+        private final Component dummy;
+        private static final int TOOLTIP_DELAY = 300;
 
-        public TrayMouseAdapter(IPFireTray ipfireTray, TrayIcon trayIcon) {
+        public TrayMouseAdapter(final IPFireTray ipfireTray, final TrayIcon trayIcon) {
+
+            super();
+
             delegate = ipfireTray;
             dummy = new Component() {
                 private static final long serialVersionUID = 1L;
@@ -56,12 +59,12 @@ public class TrayMouseAdapter extends MouseAdapter {
         }
 
         @Override
-        public void mouseClicked(MouseEvent e) {
+        public void mouseClicked(final MouseEvent e) {
             delegate.mouseClicked(e);
         }
 
         @Override
-        public void mouseEntered(MouseEvent e) {
+        public void mouseEntered(final MouseEvent e) {
             mouseover = true;
             final long enterTime = System.currentTimeMillis();
             mouseLocationObserver = new Thread() {
@@ -70,30 +73,30 @@ public class TrayMouseAdapter extends MouseAdapter {
                 public void run() {
                     try {
                         boolean mouseStay = false;
+                        MouseEvent me = null;
+
                         while (true) {
-                            Point point = MouseInfo.getPointerInfo().getLocation();
-                            if (!isOver(point)) {
-                                MouseEvent me;
+                            final Point point = MouseInfo.getPointerInfo().getLocation();
+                            
+                            if (isOver(point)) {
+                                if ((System.currentTimeMillis() - enterTime) >= TOOLTIP_DELAY && !mouseStay) {
+                                    mouseStay = true;
+                                    me = new MouseEvent(dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
+                                    me.setSource(TrayMouseAdapter.this);
+                                    delegate.mouseStay(me);
+                                }
+                            } else {
                                 me = new MouseEvent(dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
                                 me.setSource(lastEvent.getSource());
                                 mouseExited(me);
 
                                 return;
-
-                            } else {
-                                if ((System.currentTimeMillis() - enterTime) >= TOOLTIP_DELAY && !mouseStay) {
-                                    mouseStay = true;
-                                    MouseEvent me;
-                                    me = new MouseEvent(dummy, 0, System.currentTimeMillis(), 0, point.x, point.y, 0, false);
-                                    me.setSource(TrayMouseAdapter.this);
-                                    delegate.mouseStay(me);
-                                }
                             }
 
                             Thread.sleep(100);
                         }
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         return;
                     } finally {
                         mouseLocationObserver = null;
@@ -107,32 +110,33 @@ public class TrayMouseAdapter extends MouseAdapter {
         }
 
         @Override
-        public void mouseExited(MouseEvent e) {
+        public void mouseExited(final MouseEvent e) {
             mouseover = false;
-            min = max = null;
+            min = null;
+            max = null;
             delegate.mouseExited(e);
         }
 
         @Override
-        public void mousePressed(MouseEvent e) {
+        public void mousePressed(final MouseEvent e) {
             delegate.mousePressed(e);
 
         }
 
         @Override
-        public void mouseReleased(MouseEvent e) {
+        public void mouseReleased(final MouseEvent e) {
             delegate.mouseReleased(e);
 
         }
 
         @Override
-        public void mouseDragged(MouseEvent e) {
+        public void mouseDragged(final MouseEvent e) {
             delegate.mouseDragged(e);
 
         }
 
         @Override
-        public void mouseMoved(MouseEvent e) {
+        public void mouseMoved(final MouseEvent e) {
             lastEvent = e;
             /**
              * the more the user moves over the tray, the better we know it's
@@ -149,16 +153,16 @@ public class TrayMouseAdapter extends MouseAdapter {
                 // System.out.println(min+" - "+max);
             }
 
-            if (!this.mouseover) {
-                this.mouseEntered(e);
-            } else {
+            if (this.mouseover) {
                 delegate.mouseMoved(e);
+            } else {
+                this.mouseEntered(e);
             }
         }
 
         public Point getEstimatedTopLeft() {
-            int midx = (max.x + min.x) / 2;
-            int midy = (max.y + min.y) / 2;
+            final int midx = (max.x + min.x) / 2;
+            final int midy = (max.y + min.y) / 2;
 
             return new Point(midx - size.width / 2, midy - size.height / 2);
         }
@@ -170,23 +174,23 @@ public class TrayMouseAdapter extends MouseAdapter {
          * @param point
          * @return
          */
-        protected boolean isOver(Point point) {
-            int midx = (max.x + min.x) / 2;
-            int midy = (max.y + min.y) / 2;
+        protected boolean isOver(final Point point) {
+            final int midx = (max.x + min.x) / 2;
+            final int midy = (max.y + min.y) / 2;
 
-            int width = Math.min(size.width, max.x - min.x);
-            int height = Math.min(size.height, max.y - min.y);
+            final int width = Math.min(size.width, max.x - min.x);
+            final int height = Math.min(size.height, max.y - min.y);
 
-            int minx = midx - width / 2;
-            int miny = midy - height / 2;
-            int maxx = midx + width / 2;
-            int maxy = midy + height / 2;
-            // java.awt.Point[x=1274,y=1175] - java.awt.Point[x=1309,y=1185]
-            if (point.x >= minx && point.x <= maxx) {
-                if (point.y >= miny && point.y <= maxy) {
+            final int minx = midx - width / 2;
+            final int miny = midy - height / 2;
+            final int maxx = midx + width / 2;
+            final int maxy = midy + height / 2;
+            
+            if (point.x >= minx && point.x <= maxx
+                && point.y >= miny && point.y <= maxy) {
                     return true;
-                }
             }
+            
             return false;
         }
     }

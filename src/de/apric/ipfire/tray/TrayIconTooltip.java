@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with IPFireTray.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 
+ *
  * inspired by:
  * JDownloader "jdtrayicon" plugin: <http://jdownloader.org>
  */
@@ -35,13 +35,13 @@ import javax.swing.JWindow;
 /**
  * the small tooltip being displayed when hovering over the tray icon
  * shows the current speed values
- * 
+ *
  * @author apric
  */
 public final class TrayIconTooltip extends JWindow {
 
     private Point point;
-    
+
     private JLabel titleLabel;
     private JLabel downLabel;
     private JLabel upLabel;
@@ -55,29 +55,31 @@ public final class TrayIconTooltip extends JWindow {
      */
     public TrayIconTooltip() {
 
-        JPanel panel = new JPanel(new GridLayout(3, 1));
+        super();
+
+        final JPanel panel = new JPanel(new GridLayout(3, 1));
         panel.setOpaque(true);
         panel.setBackground(new Color(0xb9cee9));
         panel.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, panel.getBackground().darker()));
-        
+
         addContent(panel);
 
         this.setVisible(false);
         this.setAlwaysOnTop(true);
         this.add(panel);
-        
+
         this.pack();
     }
 
     /**
      * display the tooltip
-     * 
+     *
      * @param point the point the mouse event occurred
      */
-    public void showTooltip(Point point) {
+    public void showTooltip(final Point p) {
 
-        this.point = point;
-        
+        this.point = p;
+
         adjustLocation();
         setVisible(true);
         toFront();
@@ -98,7 +100,7 @@ public final class TrayIconTooltip extends JWindow {
         }.run();
     }
 
-    
+
     /**
      * set tooltip location automatically
      */
@@ -107,10 +109,10 @@ public final class TrayIconTooltip extends JWindow {
 
             @Override
             public void run() {
-                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                int limitX = (int) screenSize.getWidth() / 2;
-                int limitY = (int) screenSize.getHeight() / 2;
-                Point pp = point;
+                final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                final int limitX = (int) screenSize.getWidth() / 2;
+                final int limitY = (int) screenSize.getHeight() / 2;
+                final Point pp = point;
                 if (pp.x <= limitX) {
                     if (pp.y <= limitY) {
                         setLocation(pp.x, pp.y);
@@ -132,8 +134,8 @@ public final class TrayIconTooltip extends JWindow {
      * add components to panel
      * @param panel
      */
-    private void addContent(JPanel panel) {
-        
+    private void addContent(final JPanel panel) {
+
         /* Netbeans Matisse generated code: */
 
         titleLabel = new javax.swing.JLabel();
@@ -206,31 +208,31 @@ public final class TrayIconTooltip extends JWindow {
 
     /**
      * set "title" label
-     * @param title 
+     * @param title
      */
-    public void setTitle(String title){
+    public void setTitle(final String title) {
         this.titleLabel.setText(title);
     }
-    
+
     /**
      * set "down" value
-     * @param download 
+     * @param download
      */
-    public void setDownloadKBpS(float download){
-        if (download >= 0){
+    public void setDownloadKBpS(final float download) {
+        if (download >= 0) {
             downValue.setText(String.format("%5.1f", download));
         }
         else {
             downValue.setText("n/a");
         }
     }
-    
+
     /**
      * set "up" value
-     * @param upload 
+     * @param upload
      */
-    public void setUploadKBpS(float upload){
-        if (upload >= 0){
+    public void setUploadKBpS(final float upload) {
+        if (upload >= 0) {
             upValue.setText(String.format("%5.1f", upload));
         }
         else {

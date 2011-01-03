@@ -18,8 +18,13 @@
 
 package de.apric.ipfire.tray;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.SystemTray;
 import java.awt.image.BufferedImage;
+import java.util.Deque;
 import java.util.LinkedList;
 
 /**
@@ -30,22 +35,22 @@ import java.util.LinkedList;
  */
 public class DynamicTrayImage {
 
-    static final int TRAY_SIZE_X = (int) SystemTray.getSystemTray().getTrayIconSize().getWidth();
-    static final int TRAY_SIZE_Y = (int) SystemTray.getSystemTray().getTrayIconSize().getHeight();
+    public static final int TRAY_SIZE_X = (int) SystemTray.getSystemTray().getTrayIconSize().getWidth();
+    public static final int TRAY_SIZE_Y = (int) SystemTray.getSystemTray().getTrayIconSize().getHeight();
 
-    static final BufferedImage image = new BufferedImage(TRAY_SIZE_X, TRAY_SIZE_Y, Image.SCALE_SMOOTH);
-    static final Graphics2D g = image.createGraphics();
+    private static final BufferedImage IMAGE = new BufferedImage(TRAY_SIZE_X, TRAY_SIZE_Y, Image.SCALE_SMOOTH);
+    private static final Graphics2D G2D = IMAGE.createGraphics();
 
-    static final LinkedList<Float> downValuesQueue   = new LinkedList<Float>();
-    static final LinkedList<Float> upValuesQueue     = new LinkedList<Float>();
+    private static final Deque<Float> DOWNVALUES    = new LinkedList<Float>();
+    private static final Deque<Float> UPVALUES      = new LinkedList<Float>();
 
     static {
         /* set graphics rendering hints: */
-        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        G2D.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        G2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        G2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g.setBackground(Color.DARK_GRAY);
+        G2D.setBackground(Color.DARK_GRAY);
     }
 
 
@@ -58,48 +63,48 @@ public class DynamicTrayImage {
      * @param maxUpKBpS
      * @return updated image the size of a system tray icon
      */
-    public static Image getDynamicSpeedImageV2(float currentDownKBpS, float currentUpKBpS, float maxDownKBpS, float maxUpKBpS){
+    public static Image getDynamicSpeedImageV2(final float currentDownKBpS, final float currentUpKBpS, final float maxDownKBpS, final float maxUpKBpS) {
 
-        downValuesQueue.add(currentDownKBpS);
-        upValuesQueue.add(currentUpKBpS);
+        DOWNVALUES.add(currentDownKBpS);
+        UPVALUES.add(currentUpKBpS);
 
         /* remove old values no longer visible: */
-        if (downValuesQueue.size() > TRAY_SIZE_X) {
-            downValuesQueue.removeFirst();
-            upValuesQueue.removeFirst();
+        if (DOWNVALUES.size() > TRAY_SIZE_X) {
+            DOWNVALUES.removeFirst();
+            UPVALUES.removeFirst();
         }
 
         /* set background: */
-        g.setColor(Color.DARK_GRAY);
-        g.fillRect(0, 0, TRAY_SIZE_X, TRAY_SIZE_Y);
+        G2D.setColor(Color.DARK_GRAY);
+        G2D.fillRect(0, 0, TRAY_SIZE_X, TRAY_SIZE_Y);
 
         /* draw download: */
-        g.setColor(Color.GREEN);
-        int rx_i = TRAY_SIZE_X - downValuesQueue.size();
-        for (float downKBpS: downValuesQueue){
-            if (downKBpS > 0){
+        G2D.setColor(Color.GREEN);
+        int rx_i = TRAY_SIZE_X - DOWNVALUES.size();
+        for (float downKBpS : DOWNVALUES) {
+            if (downKBpS > 0) {
                 final int lineHeight = (int) Math.min(downKBpS / maxDownKBpS * TRAY_SIZE_Y, TRAY_SIZE_Y);
-                g.drawLine( rx_i, TRAY_SIZE_Y,
+                G2D.drawLine(rx_i, TRAY_SIZE_Y,
                             rx_i, TRAY_SIZE_Y - lineHeight);
             }
             /* draw a yellow bar in case of connection problems: */
-            else if (downKBpS < 0){
-                g.setColor(Color.YELLOW);
-                g.drawLine(rx_i, 0, rx_i, TRAY_SIZE_Y - 1);
-                g.setColor(Color.GREEN); // set green again
+            else if (downKBpS < 0) {
+                G2D.setColor(Color.YELLOW);
+                G2D.drawLine(rx_i, 0, rx_i, TRAY_SIZE_Y - 1);
+                G2D.setColor(Color.GREEN); // set green again
             }
 
             rx_i++;
         }
 
         /* draw upload: */
-        g.setColor(new Color(1, 0, 0, 0.8f)); // red color, slightly transparent
-        int tx_i = TRAY_SIZE_X - upValuesQueue.size();
-        int previousTx_y = TRAY_SIZE_Y - (int) Math.min(upValuesQueue.getFirst() / maxUpKBpS * TRAY_SIZE_Y, TRAY_SIZE_Y);
-        for (float upKBpS: upValuesQueue){
-            if (upKBpS > 0){
+        G2D.setColor(new Color(1, 0, 0, 0.8f)); // red color, slightly transparent
+        int tx_i = TRAY_SIZE_X - UPVALUES.size();
+        int previousTx_y = TRAY_SIZE_Y - (int) Math.min(UPVALUES.getFirst() / maxUpKBpS * TRAY_SIZE_Y, TRAY_SIZE_Y);
+        for (float upKBpS : UPVALUES) {
+            if (upKBpS > 0) {
                 final int currentTx_y = TRAY_SIZE_Y - (int) Math.min(upKBpS / maxUpKBpS * TRAY_SIZE_Y, TRAY_SIZE_Y);
-                g.drawLine( tx_i - 1,   previousTx_y,
+                G2D.drawLine(tx_i - 1,   previousTx_y,
                             tx_i,       currentTx_y);
                 previousTx_y = currentTx_y;
             }
@@ -108,9 +113,8 @@ public class DynamicTrayImage {
             tx_i++;
         }
 
-        return image;
+        return IMAGE;
     }
 
-    
 
 }

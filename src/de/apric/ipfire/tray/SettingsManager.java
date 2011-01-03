@@ -31,14 +31,20 @@ import java.util.Properties;
  *
  * @author apric
  */
-class SettingsManager {
+final class SettingsManager {
 
-    static final String PROP_FILE_NAME = "settings.properties";
+    public static final String PROP_FILE_NAME = "settings.properties";
 
-    static final String DEFAULT_IPFIRE_HOST = "ipfire.home";
-    static final String DEFAULT_IPFIRE_PORT = "444";
-    static final String DEFAULT_IPFIRE_USER = "admin";
-    static final String DEFAULT_IPFIRE_PASS = "password";
+    public static final String DEFAULT_IPFIRE_HOST = "ipfire.home";
+    public static final String DEFAULT_IPFIRE_PORT = "444";
+    public static final String DEFAULT_IPFIRE_USER = "admin";
+    public static final String DEFAULT_IPFIRE_PASS = "password";
+
+
+    /**
+     * private constructor, since this is a singleton/static class
+     */
+    private SettingsManager() {};
 
 
     /**
@@ -53,18 +59,28 @@ class SettingsManager {
         File propFile = null;
 
         propFile = new File(PROP_FILE_NAME);
+        Properties properties = null;
 
-        if (propFile.exists() && propFile.isFile() && propFile.canRead()){
-            Properties properties = new Properties();
-            properties.load(new FileInputStream(propFile));
-
-            validate(properties);
+        if (propFile.exists() && propFile.isFile() && propFile.canRead()) {
             
-            return properties;
+            FileInputStream fis = null;
+            try {
+                properties = new Properties();
+                fis = new FileInputStream(propFile);
+                properties.load(fis);
+                validate(properties);
+            }
+            finally {
+                if (fis != null) {
+                    fis.close();
+                }
+            }
         }
         else {
-            return saveAndGetSettings(getDefaultProperties());
+            properties = saveAndGetSettings(getDefaultProperties());
         }
+
+        return properties;
     }
 
 
@@ -74,10 +90,10 @@ class SettingsManager {
      * @param properties
      * @throws IllegalArgumentException in case a property value is invalid
      */
-    public static void validate(Properties properties) throws IllegalArgumentException{
+    public static void validate(final Properties properties) throws IllegalArgumentException {
 
-        if (properties == null){
-            throw new NullPointerException("Cannot validate properties file: NULL"); // uh-oh
+        if (properties == null) {
+            throw new IllegalArgumentException("Cannot validate properties file: NULL"); // uh-oh
         }
 
         /* host */
@@ -91,7 +107,7 @@ class SettingsManager {
         try {
             Integer.parseInt(properties.getProperty("port"));
         }
-        catch (NumberFormatException ex){
+        catch (NumberFormatException ex) {
             throw new IllegalArgumentException("port must an integer and > 0. Check the settings file.", ex);
         }
         
@@ -102,7 +118,7 @@ class SettingsManager {
                 throw new IllegalArgumentException("interval must be > 0. Check the settings file.");
             }
         }
-        catch (NumberFormatException ex){
+        catch (NumberFormatException ex) {
             throw new IllegalArgumentException("interval must an integer (milliseconds) and > 0. Check the settings file.", ex);
         }
         
@@ -113,7 +129,7 @@ class SettingsManager {
                 throw new IllegalArgumentException("maxDownKBpS must be > 0. Check the settings file.");
             }
         }
-        catch (NumberFormatException ex){
+        catch (NumberFormatException ex) {
             throw new IllegalArgumentException("maxDownKBpS must be a float value (KB/s) and > 0. Check the settings file.", ex);
         }
 
@@ -124,7 +140,7 @@ class SettingsManager {
                 throw new IllegalArgumentException("maxUpKBpS must be > 0. Check the settings file.");
             }
         }
-        catch (NumberFormatException ex){
+        catch (NumberFormatException ex) {
             throw new IllegalArgumentException("maxUpKBpS must be a float value (KB/s) and > 0. Check the settings file.", ex);
         }
         
@@ -138,7 +154,7 @@ class SettingsManager {
      * @return the properties file we just saved (validated)
      * @throws IOException
      */
-    public static Properties saveAndGetSettings(Properties properties) throws Exception{
+    public static Properties saveAndGetSettings(final Properties properties) throws Exception {
 
         validate(properties);
         
@@ -150,11 +166,14 @@ class SettingsManager {
 
             return properties;
         }
-        catch (IOException e){
+        catch (IOException e) {
             throw e; // re-throw Exception
         }
         finally {
-            if (fos != null) fos.close(); // cleanup
+            // cleanup
+            if (fos != null) {
+                fos.close();
+            } 
         }
     }
 
@@ -162,9 +181,9 @@ class SettingsManager {
     /**
      * @return default properties
      */
-    protected static Properties getDefaultProperties(){
+    protected static Properties getDefaultProperties() {
 
-        Properties properties = new Properties();
+        final Properties properties = new Properties();
         properties.setProperty("host",          DEFAULT_IPFIRE_HOST);
         properties.setProperty("port",          DEFAULT_IPFIRE_PORT);
         properties.setProperty("user",          DEFAULT_IPFIRE_USER);
