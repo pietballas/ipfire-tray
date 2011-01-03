@@ -21,7 +21,6 @@ package de.apric.ipfire.tray;
 import de.apric.ipfire.tray.gui.ErrorDialog;
 import java.util.Properties;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  * IPFireTray application entry point: load properties and start the system tray icon
@@ -33,8 +32,8 @@ public class Main {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        
+    public static void main(final String[] args) {
+
         try {
             final Properties validProperties = SettingsManager.loadProperties(); // load the properties file first
 
@@ -48,16 +47,16 @@ public class Main {
                         new ErrorDialog(e, true).setVisible(true);
                     }
                 }
-                
+
             });
         }
 
         /* handle all kinds of critical errors: */
 
-        catch (NumberFormatException e){ // should only occur if some configuration values are invalid:
+        catch (NumberFormatException e) { // should only occur if some configuration values are invalid:
             new ErrorDialog(new IllegalArgumentException("Check your configuration file for errors.", e), true).setVisible(true);
         }
-        catch (Exception e){ // all other exceptions:
+        catch (Exception e) { // all other exceptions:
             new ErrorDialog(e, true).setVisible(true);
         }
     }

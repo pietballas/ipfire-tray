@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author apric
  */
-public class IPFireTray extends MouseAdapter {
+public final class IPFireTray extends MouseAdapter {
 
     /* options: */
     private long refreshInterval = 0;
@@ -48,6 +48,8 @@ public class IPFireTray extends MouseAdapter {
      * @throws Exception all critical errors will go up
      */
     public IPFireTray(final Properties validProperties) throws Exception {
+
+        super();
 
         /* ensure system tray is supported: */
         final SystemTray sysTray = SystemTray.getSystemTray();
@@ -111,9 +113,9 @@ public class IPFireTray extends MouseAdapter {
      * @param trayIcon
      * @throws Exception
      */
-    private void updateTray(TrayIcon trayIcon) throws Exception {
+    private void updateTray(final TrayIcon trayIcon) throws Exception {
 
-        float[] speedValues = dataProvider.getSpeedParams();
+        final float[] speedValues = dataProvider.getSpeedParams();
 
         trayIcon.setImage(getDynamicIcon(speedValues[0], speedValues[1]));
 
@@ -123,12 +125,12 @@ public class IPFireTray extends MouseAdapter {
         trayIconTooltip.pack();
     }
 
-    public void mouseStay(MouseEvent e) {
+    public void mouseStay(final MouseEvent e) {
         trayIconTooltip.showTooltip(((TrayMouseAdapter) e.getSource()).getEstimatedTopLeft());
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(final MouseEvent e) {
         trayIconTooltip.hideTooltip();
         if (e.isPopupTrigger()) {
             popupMenu.showPopup(e.getPoint());
@@ -136,14 +138,14 @@ public class IPFireTray extends MouseAdapter {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(final MouseEvent e) {
         if (e.isPopupTrigger()) {
             popupMenu.showPopup(e.getPoint());
         }
     }
 
     @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(final MouseEvent e) {
         trayIconTooltip.hideTooltip();
     }
 
@@ -154,7 +156,7 @@ public class IPFireTray extends MouseAdapter {
      * @param currentUpKBpS
      * @return the updated image showing the current speed graph
      */
-    private Image getDynamicIcon(float currentDownKBpS, float currentUpKBpS) {
+    private Image getDynamicIcon(final float currentDownKBpS, final float currentUpKBpS) {
         return DynamicTrayImage.getDynamicSpeedImageV2(currentDownKBpS, currentUpKBpS, maxDownKBpS, maxUpKBpS);
     }
 }

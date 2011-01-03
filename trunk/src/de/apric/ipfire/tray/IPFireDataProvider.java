@@ -41,21 +41,21 @@ import sun.misc.BASE64Encoder;
  *
  * @author apric
  */
-public class IPFireDataProvider {
+public final class IPFireDataProvider {
 
-    static String IPFIRE_SPEED_CGI_PATH = "/cgi-bin/speed.cgi"; // path to "speed.cgi"
+    public static final String IPFIRE_SPEED_CGI_PATH = "/cgi-bin/speed.cgi"; // path to "speed.cgi"
 
-    final protected String host;
-    final protected int    port;
-    final protected String user;
-    final protected String pass;
+    private final String host;
+    private final int    port;
+    private final String user;
+    private final String pass;
 
-    final SSLSocketFactory sslSocketFactory;
-    final DocumentBuilder xmlDocBuilder;
+    private final SSLSocketFactory sslSocketFactory;
+    private final DocumentBuilder xmlDocBuilder;
 
-    long LAST_REFRESH = System.currentTimeMillis();
-    long lastTotalDownKB = 0;
-    long lastTotalUpKB = 0;
+    private long lastRefresh = System.currentTimeMillis();
+    private long lastTotalDownKB = 0;
+    private long lastTotalUpKB = 0;
 
 
     /**
@@ -67,7 +67,7 @@ public class IPFireDataProvider {
      * @param pass valid password (web interface admin)
      * @throws Exception
      */
-    public IPFireDataProvider(String host, int port, String user, String pass) throws Exception {
+    public IPFireDataProvider(final String host, final int port, final String user, final String pass) throws Exception {
 
         this.host = host;
         this.port = port;
@@ -80,8 +80,8 @@ public class IPFireDataProvider {
                 public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }
-                public void checkClientTrusted(X509Certificate[] xcs, String string) throws CertificateException {}
-                public void checkServerTrusted(X509Certificate[] xcs, String string) throws CertificateException {}
+                public void checkClientTrusted(final X509Certificate[] xcs, final String string) throws CertificateException {}
+                public void checkServerTrusted(final X509Certificate[] xcs, final String string) throws CertificateException {}
             }}, new java.security.SecureRandom());
 
         sslSocketFactory = sslContext.getSocketFactory();
@@ -95,7 +95,7 @@ public class IPFireDataProvider {
      * @return float values for current down and up KB/s
      * @throws Exception
      */
-    public float[] getSpeedParams() throws Exception{
+    public float[] getSpeedParams() throws Exception {
 
         long totalDownKB        = lastTotalDownKB;
         long totalUpKB          = lastTotalUpKB;
@@ -104,21 +104,21 @@ public class IPFireDataProvider {
 
         final String response = getContentFromSSLUrl();
 
-        if (!response.isEmpty()){
+        if (!response.isEmpty()) {
 
-            long[] totalUpDownValues = parseSpeedCgiXml(response);
+            final long[] totalUpDownValues = parseSpeedCgiXml(response);
 
             totalDownKB = totalUpDownValues[0];
             totalUpKB   = totalUpDownValues[1];
 
             final long currentTime = System.currentTimeMillis();
 
-            if (lastTotalDownKB != 0 && lastTotalUpKB != 0){
-                currentDownKBpS = (totalDownKB - lastTotalDownKB)   * 1.0f / (currentTime - LAST_REFRESH);
-                currentUpKBpS   = (totalUpKB - lastTotalUpKB)       * 1.0f / (currentTime - LAST_REFRESH);
+            if (lastTotalDownKB != 0 && lastTotalUpKB != 0) {
+                currentDownKBpS = (totalDownKB - lastTotalDownKB)   * 1.0f / (currentTime - lastRefresh);
+                currentUpKBpS   = (totalUpKB - lastTotalUpKB)       * 1.0f / (currentTime - lastRefresh);
             }
 
-            LAST_REFRESH = currentTime;
+            lastRefresh = currentTime;
             lastTotalDownKB = totalDownKB;
             lastTotalUpKB = totalUpKB;
         }
@@ -143,7 +143,7 @@ public class IPFireDataProvider {
             sslSocket = sslSocketFactory.createSocket(host, port);
 
             /* make request: */
-            String authStringBase64 = new BASE64Encoder().encode((user + ":" + pass).getBytes());
+            final String authStringBase64 = new BASE64Encoder().encode((user + ":" + pass).getBytes());
             outWriter = new PrintWriter(sslSocket.getOutputStream());
             outWriter.println("GET " + IPFIRE_SPEED_CGI_PATH + " HTTP/1.0");
             outWriter.println("HOST: " + host);
@@ -159,39 +159,55 @@ public class IPFireDataProvider {
             
             /* manually separate body from HTTP response: */
             String line = buffReader.readLine();
-            String httpHeader = "";
-            String httpBody = "";
+            final StringBuffer httpHeader = new StringBuffer();
+            final StringBuffer httpBody = new StringBuffer();
             boolean isHttpHeaderOver = false;
 
             while (line != null) {
-                if (isHttpHeaderOver) httpBody += line; // grab HTTP body
-                else httpHeader += line;                // grab HTTP header
+                if (isHttpHeaderOver) {
+                    httpBody.append(line); // grab HTTP body
+                }
+                else {
+                    httpHeader.append(line); // grab HTTP header
+                }
 
-                if (line.isEmpty()) isHttpHeaderOver = true; // first empty line separates HTTP header from body
+                if (line.isEmpty()) {
+                    isHttpHeaderOver = true; // first empty line separates HTTP header from body
+                }
 
                 line = buffReader.readLine();
             }
 
             /* check for unwanted HTTP responses: */
-            if (httpHeader.contains("401 Authorization Required")){
+            if (httpHeader.toString().contains("401 Authorization Required")) {
                 throw new IllegalArgumentException("Autorization failed! Please check the \"settings.properties\" and set a valid user/pass combination.");
             }
 
-            return httpBody;
+            return httpBody.toString();
         }
-        catch (IllegalArgumentException e){
-            throw e;
+        catch (IllegalArgumentException e) {
+            throw e; // only allow this kind of exception to be thrown
         }
-        catch (Exception e){
-            return "";
+        catch (Exception e) {
+            return ""; // silent fail: empty string instead of HTTP body
         }
         finally {
             /* cleanup: */
-            if (outWriter != null) outWriter.close();
-            if (buffReader != null) buffReader.close();
-            if (inReader != null) inReader.close();
-            if (inStream != null) inStream.close();
-            if (sslSocket != null) sslSocket.close();
+            if (outWriter != null) {
+                outWriter.close();
+            }
+            if (buffReader != null) {
+                buffReader.close();
+            }
+            if (inReader != null) {
+                inReader.close();
+            }
+            if (inStream != null) {
+                inStream.close();
+            }
+            if (sslSocket != null) {
+                sslSocket.close();
+            }
         }
     }
 
@@ -203,7 +219,7 @@ public class IPFireDataProvider {
      * @return long values for "total down KB" and "total up KB"
      * @throws Exception in case there was a problem reading the values
      */
-    protected long[] parseSpeedCgiXml(String xmlString) throws Exception {
+    protected long[] parseSpeedCgiXml(final String xmlString) throws Exception {
 
         final Document doc = xmlDocBuilder.parse(new InputSource(new StringReader(xmlString)));
 

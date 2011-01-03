@@ -27,13 +27,13 @@ import java.io.StringWriter;
  */
 public class ErrorDialog extends javax.swing.JDialog {
 
-    private final Throwable exception;
-    private final boolean doExitApplication;
+    private final transient Exception exception;
+    private final transient boolean doExitApplication;
 
     /**
      * @param exception this exception will be displayed
      */
-    public ErrorDialog(Throwable exception, boolean isCritical) {
+    public ErrorDialog(final Exception exception, final boolean isCritical) {
         super();
 
         this.exception = exception;
@@ -50,10 +50,9 @@ public class ErrorDialog extends javax.swing.JDialog {
     /**
      * @return stack trace as string
      */
-    private String getStackTrace()
-    {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
+    private String getStackTrace() {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
         exception.printStackTrace(pw);
         pw.flush();
         sw.flush();
@@ -73,7 +72,7 @@ public class ErrorDialog extends javax.swing.JDialog {
         okButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         exceptionTextArea = new javax.swing.JTextArea();
-        errorMessage = new javax.swing.JLabel();
+        errMessage = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Error");
@@ -100,7 +99,7 @@ public class ErrorDialog extends javax.swing.JDialog {
         exceptionTextArea.setText(getStackTrace());
         jScrollPane1.setViewportView(exceptionTextArea);
 
-        errorMessage.setText(exception.getMessage());
+        errMessage.setText(exception.getMessage());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -111,14 +110,14 @@ public class ErrorDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE)
                     .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(errorMessage, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE))
+                    .addComponent(errMessage, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 579, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(errorMessage, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                .addComponent(errMessage, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -141,11 +140,13 @@ public class ErrorDialog extends javax.swing.JDialog {
     private void doClose() {
         setVisible(false);
         dispose();
-        if (doExitApplication) System.exit(1);
+        if (doExitApplication) {
+            System.exit(1);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel errorMessage;
+    private javax.swing.JLabel errMessage;
     private javax.swing.JTextArea exceptionTextArea;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton okButton;
